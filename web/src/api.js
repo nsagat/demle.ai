@@ -7,14 +7,26 @@
 //   2. localStorage (remembered from a previous ?api=)
 //   3. VITE_API_BASE build-time env var
 //   4. '' (same-origin — works in dev via the vite proxy)
+// Deployed fallback backend so the bare Vercel URL works with no query param.
+// This is an ephemeral cloudflared tunnel to a locally-run agent — update it (or
+// set VITE_API_BASE / use ?api=) when the tunnel or backend host changes.
+const DEPLOYED_BACKEND = 'https://jesse-mainly-silent-evaluated.trycloudflare.com'
+
+const trim = (s) => (s || '').replace(/\/+$/, '')
+
 function resolveBase() {
   try {
     const p = new URLSearchParams(window.location.search).get('api')
-    if (p) { window.localStorage.setItem('demle_api', p); return p.replace(/\/+$/, '') }
+    if (p) { window.localStorage.setItem('demle_api', p); return trim(p) }
     const saved = window.localStorage.getItem('demle_api')
-    if (saved) return saved.replace(/\/+$/, '')
+    if (saved) return trim(saved)
+    if (import.meta.env.VITE_API_BASE) return trim(import.meta.env.VITE_API_BASE)
+    // deployed (not localhost) → use the baked-in backend
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return trim(DEPLOYED_BACKEND)
+    }
   } catch { /* no DOM (SSR/tests) */ }
-  return (import.meta.env.VITE_API_BASE || '').replace(/\/+$/, '')
+  return '' // dev: same-origin, proxied to :8000 by vite
 }
 const BASE = resolveBase()
 
