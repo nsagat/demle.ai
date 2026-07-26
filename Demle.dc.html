@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#F4F6F2}
+  *{box-sizing:border-box}
+  a{color:#1F3A2E;text-decoration:none;border-bottom:1px solid #B7C2B4}
+  a:hover{color:#1F3A2E}
+  button{font-family:inherit}
+  button:focus-visible{outline:2px solid #1F3A2E;outline-offset:2px}
+  @keyframes led-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+  @keyframes led-fade{from{opacity:0}to{opacity:1}}
+  @keyframes led-blink{50%{opacity:0}}
+  [data-trace]::-webkit-scrollbar{width:8px}
+  [data-trace]::-webkit-scrollbar-thumb{background:rgba(244,246,242,0.25)}
+  [data-trace]::-webkit-scrollbar-track{background:transparent}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div data-screen-label="Demle" style="min-height:100vh;background:#F4F6F2;color:#2C3E33;font-family:'Inter',system-ui,sans-serif;font-size:12.5px">
+  <div style="max-width:1160px;margin:0 auto;padding:28px 32px 64px 32px">
+
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:14px">
+        <span style="font-family:'Lora',serif;font-weight:600;font-size:22px;color:#1F3A2E">Demle</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#8A948B">match skills, don't just dump</span>
+      </div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7B6F">triton-inference-server/client · 82 merged PRs · 78 reviews · 7 contributors</span>
+    </div>
+    <div style="height:2px;background:#1F3A2E"></div>
+    <div style="height:1px;background:#DCE3DA;margin-top:3px"></div>
+
+    <div style="margin-top:22px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:#6E7B6F">OPEN ISSUE</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:14px">
+        <div>
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#1F3A2E">#2841</span>
+            <span style="font-family:'Lora',serif;font-size:15px;font-weight:600;color:#1F3A2E">Add async streaming support to the Python client</span>
+          </div>
+          <p style="font-size:12px;color:#6E7B6F;margin:5px 0 0 0;max-width:560px;line-height:1.55;text-wrap:pretty">The Python client blocks on stream reads. Needs an async path matching the C++ client's semantics, plus gRPC stream lifecycle handling.</p>
+        </div>
+        <button onClick="{{ run }}" disabled="{{ running }}" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.05em;padding:9px 18px;white-space:nowrap;flex-shrink:0;cursor:{{ runCursor }};background:{{ runBg }};color:{{ runColor }};border:1px solid {{ runBorder }};transition:all 200ms">{{ runLabel }}</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:#6E7B6F">AGENT TRACE</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:{{ statusColor }}">{{ statusText }}</span>
+      </div>
+      <div data-trace="1" ref="{{ traceRef }}" style="background:#1F3A2E;border:1px solid #1F3A2E;padding:12px 14px;height:168px;overflow-y:auto">
+        <sc-if value="{{ idle }}" hint-placeholder-val="{{ true }}">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:rgba(244,246,242,0.55)">waiting for issue events…</span>
+        </sc-if>
+        <sc-for list="{{ traceLines }}" as="ln" hint-placeholder-count="0">
+          <div style="display:flex;gap:8px;align-items:baseline;margin-bottom:5px;animation:led-in 260ms cubic-bezier(.2,.8,.2,1) both">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(244,246,242,0.4)">▸</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ ln.toolColor }}">{{ ln.tool }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:rgba(233,229,220,0.6)">({{ ln.arg }})</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:rgba(244,246,242,0.4)">→</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ ln.resColor }}">{{ ln.result }}</span>
+          </div>
+        </sc-for>
+        <sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:rgba(244,246,242,0.75)">▸ working<span style="animation:led-blink 1s steps(1) infinite">_</span></span>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="margin-top:26px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:#6E7B6F">CAPABILITY REGISTER</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">columns discovered from repo history · rows are people</span>
+      </div>
+      <div style="border-right:1px solid #DCE3DA">
+        <div style="display:flex;align-items:stretch">
+          <div style="width:176px;flex-shrink:0;display:flex;justify-content:space-between;align-items:flex-end;padding:0 10px 7px 0">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;color:#8A948B">CONTRIBUTOR</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;color:#8A948B">LOAD</span>
+          </div>
+          <sc-for list="{{ areas }}" as="area" hint-placeholder-count="9">
+            <div style="flex:1 1 0;min-width:54px;height:92px;display:flex;justify-content:center;align-items:flex-end;padding-bottom:7px;border-left:1px solid #DCE3DA;background:{{ area.bg }};transition:background 240ms">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.06em;color:{{ area.color }};writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;transition:color 240ms">{{ area.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="height:1px;background:#B7C2B4"></div>
+        <sc-for list="{{ rows }}" as="row" hint-placeholder-count="7">
+          <div style="display:flex;align-items:stretch;height:31px;border-bottom:1px solid #DCE3DA">
+            <div style="width:176px;flex-shrink:0;padding-right:10px">
+              <sc-if value="{{ row.loaded }}" hint-placeholder-val="{{ false }}">
+                <div style="height:30px;display:flex;justify-content:space-between;align-items:center;animation:led-fade 220ms both">
+                  <span style="font-size:12.5px;color:{{ row.nameColor }};font-weight:{{ row.nameWeight }};transition:color 240ms">{{ row.name }}</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:{{ row.capColor }}">{{ row.cap }}</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ row.pending }}" hint-placeholder-val="{{ true }}">
+                <div style="height:30px;display:flex;align-items:center"><span style="display:block;width:110px;height:7px;background:#E6EBE3"></span></div>
+              </sc-if>
+            </div>
+            <sc-for list="{{ row.cells }}" as="cell">
+              <div style="flex:1 1 0;min-width:54px;border-left:1px solid #DCE3DA;display:flex;align-items:center;justify-content:center;background:{{ cell.bg }};transition:background 240ms">
+                <sc-if value="{{ cell.solid }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:block;width:32px;height:13px;background:#1F3A2E;opacity:{{ cell.op }};box-shadow:{{ cell.ring }};transition:box-shadow 320ms cubic-bezier(.2,.8,.2,1);animation:led-fade 240ms both"></span>
+                </sc-if>
+                <sc-if value="{{ cell.hollow }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:block;width:32px;height:13px;border:1px dashed #567F63;box-shadow:{{ cell.ringG }};transition:box-shadow 320ms cubic-bezier(.2,.8,.2,1);animation:led-fade 240ms both"></span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:11px">
+          <div style="display:flex;gap:20px">
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="display:block;width:20px;height:10px;background:#1F3A2E"></span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">evidence · derived from merged PRs + reviews</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="display:block;width:20px;height:10px;border:1px dashed #567F63"></span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">intent · stated by the engineer, never inferred</span>
+            </div>
+          </div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">windows build — no one has shipped this · hire, train, or scope it out</span>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:26px;animation:led-in 400ms cubic-bezier(.2,.8,.2,1) both">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+          <div style="display:flex;gap:10px;align-items:baseline">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:#6E7B6F">TWO WAYS TO ASSIGN THIS</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">the PM picks</span>
+          </div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1F3A2E">{{ assignedNote }}</span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+
+          <div style="flex:1 1 0;min-width:320px;display:flex;flex-direction:column;border:1px solid {{ ship.border }};background:{{ ship.bg }};padding:16px;transition:all 300ms cubic-bezier(.2,.8,.2,1)">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.14em;color:#1F3A2E">SHIPS FAST</span>
+            <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px">
+              <span style="font-family:'Lora',serif;font-size:17px;font-weight:600;color:#1F3A2E">Ana Duarte</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#6E7B6F">evidence: strong</span>
+            </div>
+            <p style="font-size:12.5px;color:#2C3E33;margin:9px 0 0 0;line-height:1.55;text-wrap:pretty">Owns the Python client's request path — 5 merged PRs, 3 reviews. Has capacity now, and her stated gRPC interest covers the stream-lifecycle half.</p>
+            <div style="display:flex;gap:16px;margin-top:11px">
+              <div style="display:flex;gap:4px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#1F3A2E">5</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">PRs</span></div>
+              <div style="display:flex;gap:4px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#1F3A2E">3</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">reviews</span></div>
+              <div style="display:flex;gap:4px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#1F3A2E">2/4</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">load</span></div>
+            </div>
+            <button onClick="{{ toggleShip }}" style="background:none;border:none;padding:10px 0 0 0;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7B6F">{{ ship.artLabel }}</button>
+            <sc-if value="{{ ship.artOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:6px;border-left:1px solid #B7C2B4;padding-left:11px">
+                <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7B6F;padding:3px 0;line-height:1.4">#2610 Refactor infer() response handling</span>
+                <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7B6F;padding:3px 0;line-height:1.4">#2588 Fix timeout propagation in async path</span>
+                <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7B6F;padding:3px 0;line-height:1.4">#2501 Type stubs for the client surface</span>
+              </div>
+            </sc-if>
+            <div style="height:13px;margin-top:auto"></div>
+            <button onClick="{{ chooseShip }}" disabled="{{ ship.btnDisabled }}" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.05em;padding:9px 0;cursor:{{ ship.btnCursor }};background:{{ ship.btnBg }};color:{{ ship.btnColor }};border:1px solid #1F3A2E;transition:all 300ms">{{ ship.btnLabel }}</button>
+          </div>
+
+          <div style="flex:1 1 0;min-width:320px;display:flex;flex-direction:column;border:1px solid {{ grow.border }};background:{{ grow.bg }};padding:16px;transition:all 300ms cubic-bezier(.2,.8,.2,1)">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.14em;color:#567F63">DEVELOPS</span>
+            <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px">
+              <span style="font-family:'Lora',serif;font-size:17px;font-weight:600;color:#1F3A2E">Riya Shah</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#6E7B6F">evidence: thin</span>
+            </div>
+            <p style="font-size:12.5px;color:#2C3E33;margin:9px 0 0 0;line-height:1.55;text-wrap:pretty">No shipped Python-client work yet — the nearest artifact is one CI harness PR. A stretch with a safety net, not a blind bet.</p>
+            <div style="margin-top:9px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;color:#567F63">STATED</span>
+              <span style="font-size:11.5px;color:#2C3E33">"Ship a real feature, not just tooling."</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#6E7B6F">1:1 · 2026-07-02</span>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:11px">
+              <div style="display:flex;gap:4px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#1F3A2E">0</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">python client PRs</span></div>
+              <div style="display:flex;gap:4px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#1F3A2E">7</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">PRs elsewhere</span></div>
+              <div style="display:flex;gap:4px;align-items:baseline"><span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#1F3A2E">1/4</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A948B">load</span></div>
+            </div>
+            <div style="margin-top:11px;padding:10px 12px;border:1px solid #B7C2B4;border-left:2px solid #567F63">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.1em;color:#567F63">PAIR WITH</span>
+              <div style="font-size:12.5px;margin-top:4px">Tomas Lindqvist</div>
+              <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7B6F;margin-top:3px;line-height:1.45">12 PRs on the C++ client's async semantics — the pattern this port must match.</span>
+            </div>
+            <button onClick="{{ toggleGrow }}" style="background:none;border:none;padding:10px 0 0 0;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7B6F">{{ grow.artLabel }}</button>
+            <sc-if value="{{ grow.artOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:6px;border-left:1px solid #B7C2B4;padding-left:11px">
+                <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7B6F;padding:3px 0;line-height:1.4">#2733 Add retry backoff to CI harness</span>
+              </div>
+            </sc-if>
+            <div style="height:13px;margin-top:auto"></div>
+            <button onClick="{{ chooseGrow }}" disabled="{{ grow.btnDisabled }}" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.05em;padding:9px 0;cursor:{{ grow.btnCursor }};background:{{ grow.btnBg }};color:{{ grow.btnColor }};border:1px solid #567F63;transition:all 300ms">{{ grow.btnLabel }}</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;border:1px solid #A85438;border-left-width:3px;background:rgba(168,84,56,0.07);padding:12px 14px">
+          <div style="font-size:12.5px;line-height:1.55;text-wrap:pretty"><strong style="color:#A85438;font-weight:600">Java bindings have no active owner.</strong> Kwame Boateng last contributed 14 months ago. The agent reconstructed what he knew from 47 review threads into a skills file.</div>
+          <button onClick="{{ downloadSkill }}" style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.05em;padding:7px 13px;cursor:pointer;background:transparent;color:#A85438;border:1px solid #A85438">↓ SKILL.md</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;banding&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Register&quot;},
+  &quot;traceSpeed&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 1, &quot;min&quot;: 0.5, &quot;max&quot;: 2.5, &quot;step&quot;: 0.5, &quot;unit&quot;: &quot;x&quot;, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Agent run&quot;},
+  &quot;autorun&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Agent run&quot;}
+}">
+class Component extends DCLogic {
+  C = { ink:"#F4F6F2", panel:"#FFFFFF", rule:"#B7C2B4", hair:"#DCE3DA", entry:"#1F3A2E",
+        strong:"#1F3A2E", intent:"#567F63", flag:"#A85438", thin:"#8A948B", text:"#2C3E33", muted:"#6E7B6F" };
+  AREAS = ["python client","c++ client","grpc","java bindings","build/cmake","perf analyzer","CI","docs","windows build"];
+  PEOPLE = [
+    { id:"p1", name:"Marcus Chen", openTasks:4, capacity:4, monthsInactive:0,
+      evidence:{ "python client":{prs:9,reviews:14,confidence:"strong"}, "grpc":{prs:4,reviews:6,confidence:"moderate"} },
+      wants:["c++ client"], goal:"Move from Python into the C++ client this year.", goalSource:"eng sync 2026-05-20" },
+    { id:"p2", name:"Priya Raman", openTasks:2, capacity:4, monthsInactive:0,
+      evidence:{ "grpc":{prs:11,reviews:7,confidence:"strong"}, "c++ client":{prs:3,reviews:4,confidence:"moderate"} },
+      wants:["perf analyzer"], goal:"Get depth in performance work.", goalSource:"growth plan 2026-04" },
+    { id:"p3", name:"Jonah Weiss", openTasks:1, capacity:4, monthsInactive:1,
+      evidence:{ "build/cmake":{prs:6,reviews:9,confidence:"strong"}, "CI":{prs:7,reviews:5,confidence:"strong"} },
+      wants:["c++ client"], goal:"Stop being the build person. Write product code.", goalSource:"1:1 2026-06-30" },
+    { id:"p4", name:"Ana Duarte", openTasks:2, capacity:4, monthsInactive:0,
+      evidence:{ "python client":{prs:5,reviews:3,confidence:"moderate"}, "docs":{prs:4,reviews:2,confidence:"moderate"} },
+      wants:["grpc"], goal:"Understand the wire protocol properly.", goalSource:"eng sync 2026-06-14" },
+    { id:"p5", name:"Tomas Lindqvist", openTasks:3, capacity:4, monthsInactive:2,
+      evidence:{ "c++ client":{prs:12,reviews:15,confidence:"strong"}, "perf analyzer":{prs:6,reviews:4,confidence:"moderate"} },
+      wants:[], goal:"" },
+    { id:"p6", name:"Riya Shah", openTasks:1, capacity:4, monthsInactive:0,
+      evidence:{ "CI":{prs:4,reviews:3,confidence:"moderate"}, "docs":{prs:3,reviews:1,confidence:"thin"} },
+      wants:["python client"], goal:"Ship a real feature, not just tooling.", goalSource:"1:1 2026-07-02" },
+    { id:"p7", name:"Kwame Boateng", openTasks:0, capacity:4, monthsInactive:14,
+      evidence:{ "java bindings":{prs:8,reviews:5,confidence:"strong"} }, wants:[], goal:"" }
+  ];
+  TRACE = [
+    { tool:"analyze_issue", arg:"#2841", result:"needs: python client · grpc · async semantics", kind:"evidence", ms:900, areas:["python client","grpc"] },
+    { tool:"search_evidence", arg:"python client", result:"2 holders · 14 PRs · strongest: Marcus Chen", kind:"evidence", ms:760 },
+    { tool:"search_evidence", arg:"grpc", result:"2 holders · 15 PRs", kind:"evidence", ms:600 },
+    { tool:"get_capacity", arg:"Marcus Chen", result:"4/4 · at capacity", kind:"evidence", ms:560 },
+    { tool:"get_development_profile", arg:"Ana Duarte", result:"wants: grpc · stated 2026-06-14", kind:"intent", ms:700 },
+    { tool:"get_development_profile", arg:"Riya Shah", result:"wants: python client · stated 2026-07-02", kind:"intent", ms:600 },
+    { tool:"check_bus_factor", arg:"java bindings", result:"0 active owners · last touch 14mo ago", kind:"risk", ms:720 },
+    { tool:"generate_skills_file", arg:"java bindings", result:"reconstructing from 47 review threads…", kind:"risk", ms:1150 }
+  ];
+  SKILL_MD = [
+    "# SKILL — Java bindings (triton-inference-server/client)","",
+    "Reconstructed by Demle on 2026-07-25.",
+    "Sources: 47 review threads · 19 merged PRs · primary author Kwame Boateng (last active 2025-05).",
+    "Nothing here is inferred; every claim links to a thread.","",
+    "## Scope",
+    "JNI wrapper around the C++ client core: build, memory ownership, stream callbacks.","",
+    "## Load-bearing knowledge",
+    "- The Java wrapper is generated at build time by javacpp; regenerate after ANY change to core client headers (PR #1847).",
+    "- Stream callbacks cross the JNI boundary on the gRPC completion-queue thread — never block there (thread #1902).",
+    "- ByteBuffer ownership: the C++ side frees after callback return; copy before handing to user code (PR #1911, bug #1908).",
+    "- Windows builds link against the static core lib only (thread #2054).","",
+    "## Known gaps",
+    "- Async infer() has no Java surface — Python/C++ only.",
+    "- Tests cover unary paths; streaming is untested since 2025-04.","",
+    "## Checkable sources",
+    "PRs: #1847 #1902 #1911 #2054 · full thread index in demle export"
+  ].join("\n");
+  state = { loaded: 0, steps: 0, running: false, done: false, chosen: null, shipOpen: false, growOpen: false };
+  t(fn, ms) { this.timers.push(setTimeout(fn, ms)); }
+  componentDidMount() {
+    this.timers = [];
+    const n = this.PEOPLE.length;
+    for (let i = 1; i <= n; i++) this.t(() => this.setState({ loaded: i }), 320 + i * 140);
+    if (this.props.autorun) this.t(() => this.run(), 320 + n * 140 + 700);
+  }
+  componentWillUnmount() { (this.timers || []).forEach(clearTimeout); }
+  componentDidUpdate() {
+    if (this.traceEl && this.state.steps !== this._lastSteps) {
+      this._lastSteps = this.state.steps;
+      this.traceEl.scrollTop = this.traceEl.scrollHeight;
+    }
+  }
+  traceRef = (el) => { this.traceEl = el; };
+  run = () => {
+    if (this.state.running) return;
+    this.setState({ steps: 0, done: false, chosen: null, running: true, shipOpen: false, growOpen: false });
+    const speed = this.props.traceSpeed ?? 1;
+    let acc = 0;
+    this.TRACE.forEach((s, i) => {
+      acc += s.ms / speed;
+      const last = i === this.TRACE.length - 1;
+      this.t(() => this.setState(last ? { steps: i + 1, running: false, done: true } : { steps: i + 1 }), acc);
+    });
+  };
+  chooseShip = () => this.setState({ chosen: "ship" });
+  chooseGrow = () => this.setState({ chosen: "grow" });
+  toggleShip = () => this.setState(s => ({ shipOpen: !s.shipOpen }));
+  toggleGrow = () => this.setState(s => ({ growOpen: !s.growOpen }));
+  downloadSkill = () => {
+    const blob = new Blob([this.SKILL_MD], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "SKILL-java-bindings.md";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  renderVals() {
+    const C = this.C, S = this.state;
+    const banding = this.props.banding ?? true;
+    const shown = this.TRACE.slice(0, S.steps);
+    const lit = new Set(shown.flatMap(x => x.areas || []));
+    const riskAreas = new Set(shown.filter(x => x.kind === "risk").map(x => x.arg));
+    const picked = S.done ? { "Ana Duarte": 1, "Riya Shah": 1 } : {};
+    const areas = this.AREAS.map((label, i) => ({
+      label: label.toUpperCase(),
+      color: lit.has(label) ? C.entry : C.muted,
+      bg: lit.has(label) ? "rgba(31,58,46,0.05)" : (banding && i % 2 === 1 ? "rgba(31,58,46,0.03)" : "transparent")
+    }));
+    const rows = this.PEOPLE.map((p, pi) => {
+      const loaded = pi < S.loaded;
+      const gone = p.monthsInactive > 6;
+      const sel = !!picked[p.name];
+      return {
+        loaded, pending: !loaded, name: p.name,
+        nameColor: sel ? C.strong : gone ? C.thin : C.text,
+        nameWeight: sel ? 600 : 400,
+        cap: gone ? Math.round(p.monthsInactive) + "mo" : p.openTasks + "/" + p.capacity,
+        capColor: gone ? C.flag : C.thin,
+        cells: this.AREAS.map((a, ai) => {
+          const e = p.evidence[a];
+          const vol = e ? e.prs + e.reviews * 0.6 : 0;
+          const solid = loaded && vol > 0;
+          const hollow = loaded && !e && p.wants.includes(a);
+          let ring = "none";
+          if (solid && riskAreas.has(a) && gone) ring = "0 0 0 2px rgba(168,84,56,0.4)";
+          else if (solid && sel && lit.has(a)) ring = "0 0 0 2px rgba(31,58,46,0.35)";
+          return {
+            bg: areas[ai].bg, solid, hollow,
+            op: gone ? 0.22 : Math.min(0.16 + vol / 24, 0.95),
+            ring,
+            ringG: hollow && sel && lit.has(a) ? "0 0 0 2px rgba(86,127,99,0.35)" : "none"
+          };
+        })
+      };
+    });
+    const traceLines = shown.map(s => ({
+      tool: s.tool, arg: s.arg, result: s.result,
+      toolColor: s.kind === "intent" ? "#7FA88F" : "#E9E5DC",
+      resColor: s.kind === "risk" ? "#D9917A" : s.kind === "intent" ? "#7FA88F" : "#F4F6F2"
+    }));
+    const totalS = (this.TRACE.reduce((a, s) => a + s.ms, 0) / (this.props.traceSpeed ?? 1) / 1000).toFixed(1);
+    const card = (col, key, openKey, count) => {
+      const mine = S.chosen === key;
+      const open = S[openKey];
+      return {
+        border: mine ? col : C.rule,
+        bg: mine ? col + "14" : C.panel,
+        btnLabel: mine ? "ASSIGNED" : S.chosen ? "CHOOSE OTHER" : "ASSIGN",
+        btnBg: mine || S.chosen ? "transparent" : col,
+        btnColor: mine || S.chosen ? col : C.ink,
+        btnCursor: mine ? "default" : "pointer",
+        btnDisabled: mine,
+        artOpen: open,
+        artLabel: (open ? "▾ " : "▸ ") + count + (count === 1 ? " artifact" : " artifacts")
+      };
+    };
+    return {
+      run: this.run, traceRef: this.traceRef, downloadSkill: this.downloadSkill,
+      chooseShip: this.chooseShip, chooseGrow: this.chooseGrow,
+      toggleShip: this.toggleShip, toggleGrow: this.toggleGrow,
+      idle: S.steps === 0 && !S.running, running: S.running, done: S.done,
+      runLabel: S.running ? "RUNNING…" : S.done ? "RUN AGAIN" : "ISSUE OPENED →",
+      runBg: S.running ? "transparent" : C.entry,
+      runColor: S.running ? C.thin : C.ink,
+      runBorder: S.running ? C.rule : C.entry,
+      runCursor: S.running ? "default" : "pointer",
+      statusText: S.running ? "running…" : S.done ? this.TRACE.length + " steps · " + totalS + "s" : S.loaded < this.PEOPLE.length ? "ingesting repo history…" : "idle",
+      statusColor: S.running ? C.entry : C.thin,
+      traceLines, areas, rows,
+      assignedNote: S.chosen === "ship" ? "#2841 → Ana Duarte" : S.chosen === "grow" ? "#2841 → Riya Shah · pair: Tomas Lindqvist" : "",
+      ship: card(C.entry, "ship", "shipOpen", 3),
+      grow: card(C.intent, "grow", "growOpen", 1)
+    };
+  }
+}
+</script>
+</body>
+</html>

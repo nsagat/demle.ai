@@ -1,0 +1,11 @@
+.env
+.env.local
+web/.env*.local
+data/*
+!data/graph.json
+__pycache__/
+*.pyc
+web/node_modules/
+web/dist/
+.vercel
+.DS_Store
