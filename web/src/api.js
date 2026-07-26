@@ -1,8 +1,22 @@
 // demle — thin client over the FastAPI agent.
 // Dev: vite proxies /api -> localhost:8000 (see vite.config.js), so BASE is ''.
-// Prod (e.g. Vercel): set VITE_API_BASE to the deployed backend's origin, since
-// the static frontend and the Python agent are hosted separately.
-const BASE = import.meta.env.VITE_API_BASE || ''
+// Prod (e.g. Vercel): the static frontend and the Python agent are hosted
+// separately, so point the frontend at the backend. Resolution order:
+//   1. ?api=<url> query param (persisted to localStorage) — best for demos +
+//      ephemeral tunnel URLs: open demle-ai.vercel.app/?api=https://xyz.trycloudflare.com once
+//   2. localStorage (remembered from a previous ?api=)
+//   3. VITE_API_BASE build-time env var
+//   4. '' (same-origin — works in dev via the vite proxy)
+function resolveBase() {
+  try {
+    const p = new URLSearchParams(window.location.search).get('api')
+    if (p) { window.localStorage.setItem('demle_api', p); return p.replace(/\/+$/, '') }
+    const saved = window.localStorage.getItem('demle_api')
+    if (saved) return saved.replace(/\/+$/, '')
+  } catch { /* no DOM (SSR/tests) */ }
+  return (import.meta.env.VITE_API_BASE || '').replace(/\/+$/, '')
+}
+const BASE = resolveBase()
 
 const qs = (repo) => (repo ? `?repo=${encodeURIComponent(repo)}` : '')
 
